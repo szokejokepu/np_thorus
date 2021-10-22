@@ -132,7 +132,7 @@ class Thorus(np.ndarray):
     def __setitem__(self, key, value):
         if np.issubdtype(type(key), np.integer):
             if key >= self.shape[0] or key < 0:
-                key_new = key % self.shape
+                key_new = key % self.shape[0]
             else:
                 key_new = key
             super().__setitem__(key_new, value)
@@ -170,7 +170,7 @@ class Thorus(np.ndarray):
                 super().__setitem__(key_new, value)
 
             elif key_new.stop >= self.shape[0] and key_new.start >= self.shape[0]:
-                raise ValueError('The type is key_new is confusing {}'.format(key))
+                super().__setitem__(key_new, value)
 
             else:
                 super().__setitem__(key, value)
@@ -211,12 +211,13 @@ class Thorus(np.ndarray):
                     self._set_item_split(key, value, level + 1)
 
                 elif ck.stop >= self.data.shape[level] and ck.start < self.data.shape[level]:
+                    cnt_ints = np.sum([isinstance(i, int) for i in key[0:level]], dtype=np.int)
                     new_sl_one = slice(ck.start, self.data.shape[level], ck.step)
 
                     new_k_one = copy.deepcopy(key)
                     new_k_one[level] = new_sl_one
                     splitter = self.data.shape[level] - ck.start
-                    value_one, value_two = value.split([splitter], axis=level)
+                    value_one, value_two = np.split(value,[splitter], axis=level - cnt_ints)
 
                     self._set_item_split(new_k_one, value_one, level + 1)
 
@@ -226,12 +227,14 @@ class Thorus(np.ndarray):
                     self._set_item_split(new_k_two, value_two, level + 1)
 
                 elif ck.stop >= 0 and ck.start < 0:
+                    cnt_ints = np.sum([isinstance(i, int) for i in key[0:level]], dtype=np.int)
+
                     new_sl_one = slice(ck.start % self.data.shape[level], self.data.shape[level], ck.step)
                     new_k_one = copy.deepcopy(key)
                     new_k_one[level] = new_sl_one
 
                     splitter = self.data.shape[level] - (ck.start % self.data.shape[level])
-                    value_one, value_two = value.split([splitter], axis=level)
+                    value_one, value_two = np.split(value,[splitter], axis=level - cnt_ints)
 
                     self._set_item_split(new_k_one, value_one, level + 1)
 
@@ -241,12 +244,10 @@ class Thorus(np.ndarray):
                     self._set_item_split(new_k_two, value_two, level + 1)
 
                 elif ck.stop < 0 and ck.start < 0:
-                    ck = slice(ck.start % self.data.shape[level], ck.stop % self.data.shape[level], ck.step)
-                    key[level] = ck
                     self._set_item_split(key, value, level + 1)
 
                 elif ck.stop >= self.data.shape[level] and ck.start >= self.data.shape[level]:
-                    raise ValueError('The type is key is confusing {}'.format(key))
+                    self._set_item_split(key, value, level + 1)
 
                 else:
                     self._set_item_split(key, value, level + 1)
