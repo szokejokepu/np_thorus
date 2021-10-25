@@ -22,12 +22,13 @@ class Thorus(np.ndarray):
 
         elif isinstance(key, slice):
             key_new = slice(0 if key.start is None else key.start, self.shape[0] if key.stop is None else key.stop,
-                        1 if key.step is None else key.step)
+                            1 if key.step is None else key.step)
 
             if key_new.stop <= self.shape[0] and key_new.start >= 0:
                 return np.asarray(super().__getitem__(key_new))
 
-            elif key_new.stop > self.shape[0] and key_new.start >= self.shape[0] and key_new.stop - key_new.start < self.shape[0] and key_new.stop - key_new.start > 0:
+            elif key_new.stop > self.shape[0] and key_new.start >= self.shape[0] and key_new.stop - key_new.start < \
+                    self.shape[0] and key_new.stop - key_new.start > 0:
                 key_new = slice(key_new.start % self.shape[0], key_new.stop % self.shape[0], key_new.step)
 
             elif key_new.stop > self.shape[0] and key_new.start < self.shape[0]:
@@ -139,12 +140,13 @@ class Thorus(np.ndarray):
 
         elif isinstance(key, slice):
             key_new = slice(0 if key.start is None else key.start, self.shape[0] if key.stop is None else key.stop,
-                        1 if key.step is None else key.step)
+                            1 if key.step is None else key.step)
 
             if key_new.stop <= self.shape[0] and key_new.start >= 0:
                 super().__setitem__(key_new, value)
 
-            elif key_new.stop >= self.shape[0] and key_new.start >= self.shape[0] and key_new.stop - key_new.start < self.shape[0]:
+            elif key_new.stop >= self.shape[0] and key_new.start >= self.shape[0] and key_new.stop - key_new.start < \
+                    self.shape[0]:
                 key_new = slice(key_new.start % self.shape[0], key_new.stop % self.shape[0], key_new.step)
                 super().__setitem__(key_new, value)
 
@@ -217,7 +219,7 @@ class Thorus(np.ndarray):
                     new_k_one = copy.deepcopy(key)
                     new_k_one[level] = new_sl_one
                     splitter = self.data.shape[level] - ck.start
-                    value_one, value_two = np.split(value,[splitter], axis=level - cnt_ints)
+                    value_one, value_two = np.split(value, [splitter], axis=level - cnt_ints)
 
                     self._set_item_split(new_k_one, value_one, level + 1)
 
@@ -234,7 +236,7 @@ class Thorus(np.ndarray):
                     new_k_one[level] = new_sl_one
 
                     splitter = self.data.shape[level] - (ck.start % self.data.shape[level])
-                    value_one, value_two = np.split(value,[splitter], axis=level - cnt_ints)
+                    value_one, value_two = np.split(value, [splitter], axis=level - cnt_ints)
 
                     self._set_item_split(new_k_one, value_one, level + 1)
 
